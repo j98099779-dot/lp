@@ -125,14 +125,14 @@ export function Gallery() {
   const modalImage = modalIndex !== null ? images[modalIndex] : null;
 
   return (
-    <div className="mx-auto w-full max-w-[350px]">
+    <div className="portfolio-gallery mx-auto w-full max-w-[350px] lg:max-w-none">
       <div
         ref={trackRef}
         role="region"
-        aria-roledescription="carrossel"
+        aria-roledescription="galeria"
         aria-label="Inspirações de unhas"
         onScroll={updateActiveImage}
-        className="relative flex snap-x snap-mandatory gap-4 overflow-x-auto rounded-[22px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="portfolio-track relative flex snap-x snap-mandatory gap-4 overflow-x-auto rounded-[22px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-3 lg:snap-none lg:gap-6 lg:overflow-visible"
       >
         {images.map((photo, index) => (
           <button
@@ -144,14 +144,14 @@ export function Gallery() {
               triggerRef.current = event.currentTarget;
               setModalIndex(index);
             }}
-            className="group relative aspect-[350/310] w-full shrink-0 snap-center overflow-hidden rounded-[22px] bg-[#e8dfd5] text-left focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-white"
+            className="portfolio-card group relative aspect-[350/310] w-full shrink-0 snap-center overflow-hidden rounded-[22px] bg-[#e8dfd5] text-left focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-white lg:min-w-0"
           >
             <Image
               src={photo.src}
               alt={photo.alt}
               width={350}
               height={310}
-              sizes="(max-width: 420px) calc(100vw - 64px), 350px"
+              sizes="(min-width: 1440px) 400px, (min-width: 1024px) calc((100vw - 160px) / 3), (max-width: 420px) calc(100vw - 64px), 350px"
               className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
             />
             <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
@@ -165,7 +165,7 @@ export function Gallery() {
         ))}
       </div>
 
-      <div className="mt-5 flex items-center justify-between gap-4">
+      <div className="portfolio-controls mt-5 flex items-center justify-between gap-4 lg:hidden">
         <button
           type="button"
           aria-label="Inspiração anterior"
@@ -200,7 +200,7 @@ export function Gallery() {
           <ArrowRight size={17} strokeWidth={1.5} aria-hidden="true" />
         </button>
       </div>
-      <p className="mt-3 text-center text-[10px] tracking-[0.25em] text-[#756452] uppercase">
+      <p className="portfolio-hint mt-3 text-center text-[10px] tracking-[0.25em] text-[#756452] uppercase lg:hidden">
         Arraste para explorar
       </p>
       <p className="mt-5 text-center text-[11px] leading-[1.7] text-[#756452]">

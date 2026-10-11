@@ -55,6 +55,23 @@ test("keeps the page within the viewport at every supported size", async ({ page
 
 test("navigation supports keyboard focus, Escape and anchor selection", async ({ page }) => {
   const menu = page.locator("details[data-mobile-menu]");
+  const desktopNavigation = page.locator(".desktop-navigation");
+  if (page.viewportSize()!.width >= 1024) {
+    await expect(menu).not.toBeVisible();
+    await expect(desktopNavigation).toBeVisible();
+    for (const name of ["Procedimentos", "O estúdio", "Inspirações", "Dúvidas"]) {
+      await expect(desktopNavigation.getByRole("link", { name, exact: true })).toBeVisible();
+    }
+    const procedures = desktopNavigation.getByRole("link", { name: "Procedimentos", exact: true });
+    await procedures.focus();
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(/#procedimentos$/);
+    await expect(page.locator("#procedimentos")).toBeInViewport();
+    return;
+  }
+
+  await expect(desktopNavigation).not.toBeVisible();
+  await expect(menu).toBeVisible();
   const toggle = menu.locator("summary");
   await toggle.click();
   await expect(menu).toHaveAttribute("open", "");
@@ -117,10 +134,28 @@ test("shows an honest booking notice until WhatsApp is configured", async ({ pag
   await expect(page.locator("#procedimentos")).toBeInViewport();
 });
 
-test("carousel controls select and wrap through all three inspirations", async ({ page }) => {
+test("presents a usable carousel on small screens and three visible cards on desktop", async ({ page }) => {
   const carousel = page.getByRole("region", { name: "Inspirações de unhas" });
   await carousel.scrollIntoViewIfNeeded();
-  await expect(carousel.getByRole("button")).toHaveCount(3);
+  const cards = carousel.getByRole("button");
+  await expect(cards).toHaveCount(3);
+
+  if (page.viewportSize()!.width >= 1024) {
+    const positions = await cards.evaluateAll((elements) => elements.map((element) => {
+      const rect = element.getBoundingClientRect();
+      return { left: rect.left, right: rect.right, top: rect.top, width: rect.width, height: rect.height };
+    }));
+    for (let index = 0; index < positions.length; index++) {
+      await expect(cards.nth(index)).toBeInViewport({ ratio: 0.95 });
+      expect(Math.abs(positions[index].top - positions[0].top)).toBeLessThanOrEqual(1);
+      expect(positions[index].width).toBeGreaterThan(200);
+      expect(positions[index].width / positions[index].height).toBeCloseTo(350 / 310, 1);
+      if (index > 0) expect(positions[index].left).toBeGreaterThan(positions[index - 1].right);
+    }
+    await expect(page.getByRole("button", { name: "Próxima inspiração", exact: true })).not.toBeVisible();
+    await expect(page.getByRole("button", { name: "Ver Nude delicado", exact: true })).not.toBeVisible();
+    return;
+  }
 
   await page.getByRole("button", { name: "Próxima inspiração", exact: true }).click();
   await expect(page.getByRole("button", { name: "Ver Francesinha contemporânea", exact: true })).toHaveAttribute("aria-current", "true");
@@ -167,9 +202,88 @@ test("loads every original photograph and identifies conceptual imagery", async 
   const carousel = page.getByRole("region", { name: "Inspirações de unhas" });
   await carousel.scrollIntoViewIfNeeded();
   for (const name of ["Nude delicado", "Francesinha contemporânea", "Nail art sutil"]) {
-    await page.getByRole("button", { name: `Ver ${name}`, exact: true }).click();
+    if (page.viewportSize()!.width < 1024) {
+      await page.getByRole("button", { name: `Ver ${name}`, exact: true }).click();
+    }
     const photograph = carousel.getByRole("button", { name: new RegExp(`^Ampliar ${name},`) }).locator("img");
     await expectLoadedImage(photograph);
     await expect(photograph).toHaveAttribute("alt", /inteligência artificial/);
+  }
+});
+
+test("uses the available width while preserving readable content and photograph proportions", async ({ page }) => {
+  const viewportWidth = page.viewportSize()!.width;
+  const geometry = await page.evaluate(() => {
+    const bounds = (selector: string) => {
+      const element = document.querySelector(selector)!;
+      const rect = element.getBoundingClientRect();
+      return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width, height: rect.height };
+    };
+    const portrait = document.querySelector<HTMLImageElement>(".portrait-image")!;
+    const studioImage = document.querySelector<HTMLImageElement>(".experience-image img")!;
+    return {
+      shell: bounds(".site-shell"),
+      heroCopy: bounds(".hero-copy"),
+      title: bounds(".hero-title"),
+      portrait: bounds(".hero-portrait"),
+      portraitFrame: bounds(".portrait-frame"),
+      services: bounds(".procedure-list"),
+      serviceCards: [...document.querySelectorAll(".procedure-item")].map((element) => {
+        const rect = element.getBoundingClientRect();
+        return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width };
+      }),
+      portraitFit: getComputedStyle(portrait).objectFit,
+      studioFit: getComputedStyle(studioImage).objectFit,
+    };
+  });
+
+  expect(geometry.portraitFit).toBe("cover");
+  expect(geometry.studioFit).toBe("cover");
+
+  if (viewportWidth >= 1024) {
+    expect(geometry.portraitFrame.width).toBeGreaterThanOrEqual(300);
+    expect(geometry.portraitFrame.width / geometry.portraitFrame.height).toBeCloseTo(4 / 5, 1);
+    expect(geometry.shell.width).toBeGreaterThanOrEqual(viewportWidth - 1);
+    expect(geometry.heroCopy.width).toBeGreaterThan(300);
+    expect(geometry.heroCopy.right).toBeLessThanOrEqual(geometry.portrait.left + 1);
+    expect(geometry.heroCopy.top).toBeLessThan(geometry.portrait.bottom);
+    expect(geometry.portrait.top).toBeLessThan(geometry.heroCopy.bottom);
+    expect(geometry.portrait.right - geometry.heroCopy.left).toBeLessThanOrEqual(1281);
+    expect(geometry.services.width).toBeLessThanOrEqual(1281);
+    expect(geometry.services.width).toBeGreaterThanOrEqual(Math.min(viewportWidth * 0.7, 1000));
+    const cards = geometry.serviceCards;
+    for (let index = 0; index < 3; index++) {
+      expect(Math.abs(cards[index].top - cards[0].top)).toBeLessThanOrEqual(1);
+      expect(cards[index].width).toBeGreaterThan(200);
+      if (index > 0) expect(cards[index].left).toBeGreaterThan(cards[index - 1].right);
+      expect(Math.abs(cards[index + 3].left - cards[index].left)).toBeLessThanOrEqual(1);
+      expect(cards[index + 3].top).toBeGreaterThanOrEqual(cards[index].bottom);
+    }
+  } else {
+    expect(geometry.portraitFrame.width / geometry.portraitFrame.height).toBeCloseTo(1, 1);
+    expect(geometry.portrait.bottom).toBeLessThanOrEqual(geometry.title.top);
+    if (viewportWidth >= 768) expect(geometry.shell.width).toBeGreaterThanOrEqual(viewportWidth * 0.9);
+  }
+});
+
+test("keeps added desktop booking actions available without altering the mobile hero", async ({ page }) => {
+  const headerBooking = page.locator(".header-cta");
+  const heroBooking = page.locator(".hero-primary-cta");
+  if (page.viewportSize()!.width < 1024) {
+    await expect(headerBooking).not.toBeVisible();
+    await expect(heroBooking).not.toBeVisible();
+    return;
+  }
+
+  await expect(headerBooking).toBeVisible();
+  await expect(headerBooking).toHaveAccessibleName("Agendar horário");
+  await expect(heroBooking).toBeVisible();
+  await expect(heroBooking).toHaveAccessibleName("Agendar pelo WhatsApp");
+  for (const action of [headerBooking, heroBooking]) {
+    await action.click();
+    await expect(page.getByRole("dialog", { name: "Vamos conversar em breve" })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).not.toBeVisible();
+    await expect(action).toBeFocused();
   }
 });

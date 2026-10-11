@@ -21,15 +21,17 @@ export default defineConfig({
     screenshot: "only-on-failure",
   },
   projects: [
-    { name: "desktop", use: { viewport: { width: 1440, height: 1000 } } },
     {
       name: "mobile",
-      use: { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true },
+      use: { viewport: { width: 375, height: 844 }, isMobile: true, hasTouch: true },
     },
     {
-      name: "narrow-mobile",
-      use: { viewport: { width: 320, height: 844 }, isMobile: true, hasTouch: true },
+      name: "tablet",
+      use: { viewport: { width: 768, height: 1024 }, isMobile: true, hasTouch: true },
     },
+    { name: "laptop", use: { viewport: { width: 1024, height: 1000 } } },
+    { name: "desktop", use: { viewport: { width: 1440, height: 1000 } } },
+    { name: "wide-desktop", use: { viewport: { width: 1920, height: 1000 } } },
   ],
   webServer: {
     command: "npm run start -- --port 3000",

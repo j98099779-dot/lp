@@ -143,8 +143,19 @@ export default function Home() {
         <header className="site-header">
           <a href="#inicio" className="header-brand" aria-label="Voltar ao início">
             <Flower2 size={21} strokeWidth={1.15} aria-hidden="true" />
-            <span>Beleza & cuidado</span>
+            <span className="brand-mobile">Beleza & cuidado</span>
+            <span className="brand-desktop">{SITE_CONFIG.name}</span>
           </a>
+          <nav className="desktop-navigation" aria-label="Navegação desktop">
+            <a href="#procedimentos">Procedimentos</a>
+            <a href="#o-estudio">O estúdio</a>
+            <a href="#inspiracoes">Inspirações</a>
+            <a href="#duvidas">Dúvidas</a>
+          </nav>
+          <WhatsAppButton className="header-cta">
+            <MessageCircle size={16} strokeWidth={1.4} aria-hidden="true" />
+            Agendar horário
+          </WhatsAppButton>
           <details className="site-navigation" data-mobile-menu>
             <summary>
               <span>Menu</span>
@@ -173,7 +184,8 @@ export default function Home() {
                   alt="Composição delicada de unhas em tons naturais"
                   width={640}
                   height={640}
-                  priority
+                  preload
+                  sizes="(min-width: 1024px) 500px, 640px"
                   className="portrait-image"
                 />
               </div>
@@ -181,22 +193,29 @@ export default function Home() {
                 <Flower2 size={26} strokeWidth={1} />
               </span>
             </div>
-            <p className="eyebrow hero-eyebrow">Seu momento de autocuidado</p>
-            <h1 className="hero-title" id="hero-title">
-              {SITE_CONFIG.name}
-            </h1>
-            <p className="hero-tagline">{SITE_CONFIG.tagline}</p>
-            <div className="tiny-divider" aria-hidden="true">
-              <span />
-              <Flower2 size={14} strokeWidth={1.1} />
-              <span />
+            <div className="hero-copy">
+              <p className="eyebrow hero-eyebrow">Seu momento de autocuidado</p>
+              <h1 className="hero-title" id="hero-title">
+                {SITE_CONFIG.name}
+              </h1>
+              <p className="hero-tagline">{SITE_CONFIG.tagline}</p>
+              <div className="tiny-divider" aria-hidden="true">
+                <span />
+                <Flower2 size={14} strokeWidth={1.1} />
+                <span />
+              </div>
+              <p className="hero-description">{SITE_CONFIG.description}</p>
+              <WhatsAppButton className="hero-primary-cta">
+                <MessageCircle size={18} strokeWidth={1.4} aria-hidden="true" />
+                Agendar pelo WhatsApp
+                <ArrowUpRight size={17} strokeWidth={1.3} aria-hidden="true" />
+              </WhatsAppButton>
+              <SocialLinks />
+              <a href="#descubra" className="discover-link">
+                <span>Descubra o seu próximo cuidado</span>
+                <ArrowDown size={14} strokeWidth={1.3} aria-hidden="true" />
+              </a>
             </div>
-            <p className="hero-description">{SITE_CONFIG.description}</p>
-            <SocialLinks />
-            <a href="#descubra" className="discover-link">
-              <span>Descubra o seu próximo cuidado</span>
-              <ArrowDown size={14} strokeWidth={1.3} aria-hidden="true" />
-            </a>
           </section>
 
           <div className="service-ribbon" aria-label="Nossos procedimentos">
@@ -229,30 +248,34 @@ export default function Home() {
               <h2 id="studio-title">Um ritual de<br /><em>cuidado e beleza.</em></h2>
               <p>Mais que uma cor nova, um momento para se sentir bem com você.</p>
             </div>
-            <div className="experience-image">
-              <Image
-                src="/images/studio-experience.png"
-                alt="Inspiração de um ambiente acolhedor para o cuidado das unhas"
-                width={900}
-                height={720}
-                sizes="(max-width: 540px) 90vw, 468px"
-              />
-              <div className="experience-overlay">
-                <span className="image-eyebrow">Uma pausa no seu dia</span>
-                <p>O cuidado começa<br /><em>nos pequenos detalhes.</em></p>
-              </div>
-            </div>
-            <p className="concept-note">Imagem conceitual do ambiente. Gerada com IA.</p>
-            <div className="differential-list">
-              {differentials.map(({ icon: Icon, title, description }) => (
-                <div className="differential-card" key={title}>
-                  <span className="differential-icon"><Icon size={22} strokeWidth={1.15} aria-hidden="true" /></span>
-                  <div>
-                    <h3>{title}</h3>
-                    <p>{description}</p>
+            <div className="experience-layout">
+              <div className="experience-visual">
+                <div className="experience-image">
+                  <Image
+                    src="/images/studio-experience.png"
+                    alt="Inspiração de um ambiente acolhedor para o cuidado das unhas"
+                    width={900}
+                    height={720}
+                    sizes="(max-width: 540px) 90vw, (max-width: 767px) 468px, (max-width: 1023px) 620px, 560px"
+                  />
+                  <div className="experience-overlay">
+                    <span className="image-eyebrow">Uma pausa no seu dia</span>
+                    <p>O cuidado começa<br /><em>nos pequenos detalhes.</em></p>
                   </div>
                 </div>
-              ))}
+                <p className="concept-note">Imagem conceitual do ambiente. Gerada com IA.</p>
+              </div>
+              <div className="differential-list">
+                {differentials.map(({ icon: Icon, title, description }) => (
+                  <div className="differential-card" key={title}>
+                    <span className="differential-icon"><Icon size={22} strokeWidth={1.15} aria-hidden="true" /></span>
+                    <div>
+                      <h3>{title}</h3>
+                      <p>{description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
 
@@ -336,34 +359,52 @@ export default function Home() {
             <div className="booking-panel">
               <span className="booking-circle booking-circle--one" aria-hidden="true" />
               <span className="booking-circle booking-circle--two" aria-hidden="true" />
-              <Flower2 className="booking-flower" size={28} strokeWidth={1} aria-hidden="true" />
-              <p className="eyebrow">Um convite ao autocuidado</p>
-              <h2 id="booking-title">Reserve um momento<br /><em>só seu.</em></h2>
-              <p className="booking-description">Vamos conversar sobre o cuidado que combina com você?</p>
-              <WhatsAppButton variant="light" className="booking-cta">
-                <MessageCircle size={18} strokeWidth={1.4} aria-hidden="true" />
-                Solicitar horário
-                <ArrowUpRight size={17} strokeWidth={1.3} aria-hidden="true" />
-              </WhatsAppButton>
-              <p className="booking-note"><Check size={12} aria-hidden="true" /> Horário sujeito à confirmação no atendimento</p>
+              <div className="booking-copy">
+                <Flower2 className="booking-flower" size={28} strokeWidth={1} aria-hidden="true" />
+                <p className="eyebrow">Um convite ao autocuidado</p>
+                <h2 id="booking-title">Reserve um momento<br /><em>só seu.</em></h2>
+                <p className="booking-description">Vamos conversar sobre o cuidado que combina com você?</p>
+              </div>
+              <div className="booking-actions">
+                <WhatsAppButton variant="light" className="booking-cta">
+                  <MessageCircle size={18} strokeWidth={1.4} aria-hidden="true" />
+                  Solicitar horário
+                  <ArrowUpRight size={17} strokeWidth={1.3} aria-hidden="true" />
+                </WhatsAppButton>
+                <p className="booking-note"><Check size={12} aria-hidden="true" /> Horário sujeito à confirmação no atendimento</p>
+              </div>
             </div>
           </section>
         </main>
 
         <footer className="site-footer section-pad" id="contato">
-          <p className="eyebrow">Vamos nos conectar</p>
-          <p className="footer-name">{SITE_CONFIG.name}</p>
-          <p className="footer-description">A beleza floresce nos detalhes.</p>
-          <SocialLinks />
-          {(SITE_CONFIG.address || SITE_CONFIG.businessHours) && (
-            <div className="footer-information">
-              {SITE_CONFIG.address && <p>{SITE_CONFIG.address}</p>}
-              {SITE_CONFIG.businessHours && <p>{SITE_CONFIG.businessHours}</p>}
+          <div className="footer-grid">
+            <div className="footer-brand">
+              <p className="eyebrow">Vamos nos conectar</p>
+              <p className="footer-name">{SITE_CONFIG.name}</p>
+              <p className="footer-description">A beleza floresce nos detalhes.</p>
+              <SocialLinks />
             </div>
-          )}
-          <div className="footer-divider" />
-          <p className="copyright">© 2026 {SITE_CONFIG.name}. Todos os direitos reservados.</p>
-          <a href="#inicio" className="back-to-top">Voltar ao início <ArrowUpRight size={12} aria-hidden="true" /></a>
+            <nav className="footer-navigation" aria-label="Navegação do rodapé">
+              <p className="eyebrow">Explore o estúdio</p>
+              <a href="#procedimentos">Procedimentos</a>
+              <a href="#o-estudio">O estúdio</a>
+              <a href="#inspiracoes">Inspirações</a>
+              <a href="#duvidas">Dúvidas frequentes</a>
+              <a href="#agendamento">Agendamento</a>
+            </nav>
+            {(SITE_CONFIG.address || SITE_CONFIG.businessHours) && (
+              <div className="footer-information">
+                {SITE_CONFIG.address && <p>{SITE_CONFIG.address}</p>}
+                {SITE_CONFIG.businessHours && <p>{SITE_CONFIG.businessHours}</p>}
+              </div>
+            )}
+          </div>
+          <div className="footer-bottom">
+            <div className="footer-divider" />
+            <p className="copyright">© 2026 {SITE_CONFIG.name}. Todos os direitos reservados.</p>
+            <a href="#inicio" className="back-to-top">Voltar ao início <ArrowUpRight size={12} aria-hidden="true" /></a>
+          </div>
         </footer>
       </div>
     </>

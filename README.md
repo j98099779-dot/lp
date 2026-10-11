@@ -30,6 +30,10 @@ As variáveis `NEXT_PUBLIC_*` são incorporadas pelo Next.js no build. Reinicie 
 
 `SITE_CONFIG.testimonials` começa vazio. Adicione somente depoimentos reais, com autorização; o layout está pronto para exibi-los. O estado inicial não apresenta avaliações, estatísticas ou depoimentos fictícios.
 
+## Layout responsivo
+
+Até 767px, a página preserva a composição mobile com retrato circular, menu compacto e portfólio em carrossel. Entre 768px e 1023px, os containers se ampliam e os serviços passam a duas colunas. A partir de 1024px, o layout usa containers de até 1280px, navegação horizontal, hero com texto e fotografia lado a lado, serviços e portfólio em três colunas, FAQ dividido e rodapé ampliado. As mesmas imagens, cores e interações são compartilhadas por todas as versões.
+
 ## Validação
 
 ```bash
@@ -40,7 +44,7 @@ npm run build
 npm run test:e2e
 ```
 
-Os testes de navegador cobrem desktop, celular e telas estreitas: navegação por teclado, FAQ, aviso de contato, carrossel, ampliação de imagens, ausência de rolagem horizontal e carregamento das fotos. O Playwright inicia o servidor de produção automaticamente; o build precisa existir. No ambiente em nuvem ele usa `/usr/bin/chromium`. Em uma máquina sem Chromium instalado, execute `npx playwright install chromium`; também é possível informar o executável em `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`.
+Os 50 testes de navegador cobrem as larguras 375px, 768px, 1024px, 1440px e 1920px: navegação por teclado, FAQ, aviso de contato, carrossel ou galeria em grid, ampliação de imagens, ausência de rolagem horizontal, proporções dos layouts e carregamento das fotos. O Playwright inicia o servidor de produção automaticamente; o build precisa existir. No ambiente em nuvem ele usa `/usr/bin/chromium`. Em uma máquina sem Chromium instalado, execute `npx playwright install chromium`; também é possível informar o executável em `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`.
 
 ## Produção
 
